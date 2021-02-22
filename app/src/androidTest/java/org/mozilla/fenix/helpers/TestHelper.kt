@@ -18,6 +18,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
@@ -68,8 +69,7 @@ object TestHelper {
     }
 
     fun getPermissionAllowID(): String {
-        return when
-            (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+        return when (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             true -> "com.android.permissioncontroller"
             false -> "com.android.packageinstaller"
         }
@@ -84,7 +84,15 @@ object TestHelper {
 
     fun verifyUrl(urlSubstring: String, resourceName: String, resId: Int) {
         waitUntilObjectIsFound(resourceName)
-        onView(withId(resId)).check(ViewAssertions.matches(withText(CoreMatchers.containsString(urlSubstring))))
+        onView(withId(resId)).check(
+            ViewAssertions.matches(
+                withText(
+                    CoreMatchers.containsString(
+                        urlSubstring
+                    )
+                )
+            )
+        )
     }
 
     fun openAppFromExternalLink(url: String) {
@@ -114,6 +122,22 @@ object TestHelper {
 
             if (downloadedFile.exists()) {
                 downloadedFile.delete()
+            }
+        }
+    }
+
+    fun setNetworkConnection(status: String) {
+        val mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+
+        when (status) {
+            "ON" -> {
+                mDevice.executeShellCommand("svc data enable")
+                mDevice.executeShellCommand("svc wifi enable")
+            }
+
+            "OFF" -> {
+                mDevice.executeShellCommand("svc data disable")
+                mDevice.executeShellCommand("svc wifi disable")
             }
         }
     }
